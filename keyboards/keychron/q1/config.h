@@ -30,14 +30,8 @@
 /* Disable DIP switch in matrix data */
 #define MATRIX_MASKED
 
-/* NKRO */
-#define FORCE_NKRO
-
 /* Disable RGB lighting when PC is in suspend */
 #define RGB_DISABLE_WHEN_USB_SUSPENDED
-
-/* Set the USB polling interval to 1 milliseconds */
-#define USB_POLLING_INTERVAL_MS 1
 
 // RGB Matrix Animation modes. Explicitly enabled
 // For full list of effects, see:
@@ -88,11 +82,6 @@
 #define ENABLE_RGB_MATRIX_SOLID_SPLASH
 #define ENABLE_RGB_MATRIX_SOLID_MULTISPLASH
 // #define RGB_MATRIX_KEYPRESSES
-
-/* Allow VIA to edit lighting */
-#ifdef VIA_ENABLE
-#define VIA_QMK_RGBLIGHT_ENABLE
-#endif
 
 /* Enable receive custom command from host */
 #define RAW_HID_CMD 0xAB

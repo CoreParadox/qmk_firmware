@@ -18,6 +18,9 @@
 
 #define MAC_FN 1
 #define WIN_FN 3
+#ifndef RAW_EPSIZE
+#    define RAW_EPSIZE 32
+#endif
 
 static void timer_3s_task(void);
 static void timer_300ms_task(void);
@@ -65,29 +68,29 @@ bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
                 key_press_status &= ~KEY_PRESS_FN;
                 timer_3s_buffer = 0;
             }
-            return false;  // Skip all further processing of this key
+            return true;
         case KC_J:
             if (record->event.pressed) {
                 key_press_status |= KEY_PRESS_J;
                 if (key_press_status == KEY_PRESS_FACTORY_RESET) {
-                    timer_3s_buffer = sync_timer_read32() | 1;
+                    timer_3s_buffer = sync_timer_read32();
                 }
             } else {
                 key_press_status &= ~KEY_PRESS_J;
                 timer_3s_buffer = 0;
             }
-            return false;  // Skip all further processing of this key
+            return true;
         case KC_Z:
             if (record->event.pressed) {
                 key_press_status |= KEY_PRESS_Z;
                 if (key_press_status == KEY_PRESS_FACTORY_RESET) {
-                    timer_3s_buffer = sync_timer_read32() | 1;
+                    timer_3s_buffer = sync_timer_read32();
                 }
             } else {
                 key_press_status &= ~KEY_PRESS_Z;
                 timer_3s_buffer = 0;
             }
-            return false;  // Skip all further processing of this key
+            return true;
         case KC_RGHT:
             if (record->event.pressed) {
                 key_press_status |= KEY_PRESS_RIGHT;
@@ -96,26 +99,26 @@ bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
                         led_test_mode = LED_TEST_MODE_WHITE;
                     }
                 } else if (key_press_status == KEY_PRESS_LED_TEST) {
-                    timer_3s_buffer = sync_timer_read32() | 1;
+                    timer_3s_buffer = sync_timer_read32();
                 }
             } else {
                 key_press_status &= ~KEY_PRESS_RIGHT;
                 timer_3s_buffer = 0;
             }
-            return false;  // Skip all further processing of this key
+            return true;
         case KC_HOME:
             if (record->event.pressed) {
                 key_press_status |= KEY_PRESS_HOME;
                 if (led_test_mode) {
                     led_test_mode = LED_TEST_MODE_OFF;
                 } else if (key_press_status == KEY_PRESS_LED_TEST) {
-                    timer_3s_buffer = sync_timer_read32() | 1;
+                    timer_3s_buffer = sync_timer_read32();
                 }
             } else {
                 key_press_status &= ~KEY_PRESS_HOME;
                 timer_3s_buffer = 0;
             }
-            return false;  // Skip all further processing of this key
+            return true;
         default:
             return process_record_user(keycode, record);
     }
@@ -136,7 +139,7 @@ static void timer_3s_task(void) {
     if (sync_timer_elapsed32(timer_3s_buffer) > 3000) {
         timer_3s_buffer = 0;
         if (key_press_status == KEY_PRESS_FACTORY_RESET) {
-            timer_300ms_buffer = sync_timer_read32() | 1;
+            timer_300ms_buffer = sync_timer_read32();
             factory_reset_count++;
             layer_state_t default_layer_tmp = default_layer_state;
             eeconfig_init();
@@ -170,7 +173,7 @@ static void timer_300ms_task(void) {
             timer_300ms_buffer = 0;
             factory_reset_count = 0;
         } else {
-            timer_300ms_buffer = sync_timer_read32() | 1;
+            timer_300ms_buffer = sync_timer_read32();
         }
     }
 }
@@ -241,9 +244,9 @@ void raw_hid_receive_kb(uint8_t *data, uint8_t length) {
                 break;
             case FACTORY_TEST_CMD_OS_SWITCH:
                 report_os_sw_state = data[2];
-                if (report_os_sw_state) {
-                    dip_switch_read(true);
-                }
+                // if (report_os_sw_state) {
+                //     dip_switch_read(true);
+                // }
                 break;
             case FACTORY_TEST_CMD_JUMP_TO_BL:
                 if (memcmp(&data[2], "JumpToBootloader", strlen("JumpToBootloader")) == 0)
@@ -273,7 +276,11 @@ void system_switch_state_report(uint8_t index, bool active) {
     }
 }
 
+#if 0
+
 /* To solve the problem that keyboard can not wakeup the host */
 void restart_usb_driver(USBDriver *usbp) {
     // Do nothing here.
 }
+
+#endif
